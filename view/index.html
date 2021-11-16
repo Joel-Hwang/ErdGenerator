@@ -34,6 +34,15 @@
     </div>
     <div>
         <div class="input-group mb-3" style="padding: 5px 20px;">
+            <select class="form-select form-select-sm" style="padding: 5px 20px;">
+                <option selected>DBMS</option>
+                <option value="1">Oracle</option>
+                <option value="2">MSSQL</option>
+                <option value="3">MariaDB</option>
+            </select>
+        </div>
+        
+        <div class="input-group mb-3" style="padding: 5px 20px;">
             <span class="input-group-text" id="basic-addon1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP</span>
             <input type="text" class="form-control" placeholder="Database IP" aria-label="Database IP" aria-describedby="basic-addon1">
         </div>
@@ -73,10 +82,31 @@
         <h5>Result</h5>
         <hr>
     </div>
-    <p style="padding: 5px 20px;">hello world</p>
+    <div style="display: flex;flex-wrap: wrap;">
+        <div class="card" style="margin: 5px;">
+            <div class="card-header">
+              User
+            </div>
+            <div class="card-body">
+                <p class="card-text">PK : ID</p>
+                <p class="card-text">FK : TeamID</p>
+                <p class="card-text">Name,Email.Phone</p>
+            </div>
+          </div>
+          <div class="card" style="margin: 5px;">
+            <div class="card-header">
+              Team
+            </div>
+            <div class="card-body">
+                <p class="card-text">PK : ID</p>
+                <p class="card-text">FK : Leader</p>
+                <p class="card-text">Name,Location,Parent</p>
+            </div>
+          </div>
+    </div>
 
     <div style="text-align: center;">
-        <button type="button" class="btn btn-success">Generate</button>
+        <button id="btnGen" type="button" class="btn btn-success">Generate</button>
     </div>
 
     <script src="index.js"></script>
