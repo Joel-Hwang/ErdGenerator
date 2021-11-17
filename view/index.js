@@ -44,12 +44,19 @@ function getStrFrom(sql){
 
 function getTableInfo(from){
     let elem = ('join '+from).split(' ');
+    let tables = new Object();
+    let cols = new Array();
     for(let i = 0; i<elem.length; i++){
         if(elem[i] == 'join'){
-            console.log('TABLE',elem[i+1]);
-            console.log('ALIAS',elem[i+2]);
+            tables[elem[i+2]] = elem[i+1];
         }else if(elem[i] == 'on' || elem[i] == 'and'){
-            console.log('cols',elem[i+1],elem[i+3]);
+            let col = new Object();
+            let left = elem[i+1].split('.');
+            let right = elem[i+3].split('.');
+            col.left = tables[left[0]]+'.'+left[1];
+            col.right = tables[right[0]]+'.'+right[1];
+            cols.push(col);
         }
     }
+    return [tables,cols];
 }
