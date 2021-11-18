@@ -1,6 +1,11 @@
 
 window.onload = () => {
-    let btnAdd = document.querySelector('#btnAdd');
+
+    btnConnect.addEventListener('click', async () =>{
+        let res = await connect();
+        btnConnect.innerHTML = res.result;
+    });
+
     btnAdd.addEventListener('click',()=>{
         const template = document.querySelector('#tmpSql');
         //template 복제
@@ -10,31 +15,37 @@ window.onload = () => {
     },false);
     
     btnGen.addEventListener('click', ()=>{
-        let server = document.querySelector('#server').value;
-        let database = document.querySelector('#database').value;
-        let user = document.querySelector('#user').value;
-        let password = document.querySelector('#password').value;
-        fetch('/mssql/connect', {
-            method:'POST',
-            body: JSON.stringify({server,database,user,password}),
-            headers:{
-                'Content-type':'application/json'
-            }
-        }).then(function (response) {
-            if (response.ok) {
-                return response.json();
-            }
-            return Promise.reject(response);
-        }).then(function (data) {
-            console.log(data);
-        }).catch(function (error) {
-            console.warn('Something went wrong.', error);
-        });
+        
 
         parse('select * from user a inner join team b on a.teamId = b.id left outer join common c on c.id = b.name');
     }, false);
 }
 
+async function connect(){
+    let result = {};
+    let server = document.querySelector('#server').value;
+    let database = document.querySelector('#database').value;
+    let user = document.querySelector('#user').value;
+    let password = document.querySelector('#password').value;
+    fetch('/mssql/connect', {
+        method:'POST',
+        body: JSON.stringify({server,database,user,password}),
+        headers:{
+            'Content-type':'application/json'
+        }
+    }).then(function (response) {
+        if (response.ok) {
+            return response.json();
+        }
+        return Promise.reject(response);
+    }).then(function (data) {
+        console.log(data);
+        result = data;
+    }).catch(function (error) {
+        console.warn('Something went wrong.', error);
+    });
+    return result;
+}
 
 function parse(sql){
     let from = getStrFrom(sql);
