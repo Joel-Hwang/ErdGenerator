@@ -8,8 +8,29 @@ window.onload = () => {
         //template의 td
         template.parentNode.appendChild(fragment);
     },false);
-
+    
     btnGen.addEventListener('click', ()=>{
+        let server = document.querySelector('#server').value;
+        let database = document.querySelector('#database').value;
+        let user = document.querySelector('#user').value;
+        let password = document.querySelector('#password').value;
+        fetch('/mssql/connect', {
+            method:'POST',
+            body: JSON.stringify({server,database,user,password}),
+            headers:{
+                'Content-type':'application/json'
+            }
+        }).then(function (response) {
+            if (response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        }).then(function (data) {
+            console.log(data);
+        }).catch(function (error) {
+            console.warn('Something went wrong.', error);
+        });
+
         parse('select * from user a inner join team b on a.teamId = b.id left outer join common c on c.id = b.name');
     }, false);
 }

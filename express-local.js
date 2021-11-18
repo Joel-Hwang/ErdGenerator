@@ -3,6 +3,7 @@ var session = require('express-session');
 var app = express();
 var cors = require('cors');
 var fs = require('fs');
+;
 const http = require('http').createServer(app);
 
 
@@ -11,7 +12,7 @@ app.use(cors());
 app.use(express.static('view'));
 
 app.use('/', require('./controller/ctrCommon'));
-
+app.use('/', require('./controller/ctrMssql'));
 
 app.use(
     session({
