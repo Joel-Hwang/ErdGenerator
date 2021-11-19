@@ -3,7 +3,7 @@ window.onload = () => {
 
     btnConnect.addEventListener('click', async () =>{
         let res = await connect();
-        btnConnect.innerHTML = res.result;
+        btnConnect.innerHTML = res.status;
     });
 
     btnAdd.addEventListener('click',()=>{
@@ -27,24 +27,27 @@ async function connect(){
     let database = document.querySelector('#database').value;
     let user = document.querySelector('#user').value;
     let password = document.querySelector('#password').value;
-    fetch('/mssql/connect', {
+    const response = await fetch('/mssql/connect', {
         method:'POST',
         body: JSON.stringify({server,database,user,password}),
         headers:{
             'Content-type':'application/json'
         }
-    }).then(function (response) {
+    });
+    let data = await response.json();
+    return data;
+    /*.then(function (response) {
         if (response.ok) {
             return response.json();
         }
         return Promise.reject(response);
     }).then(function (data) {
         console.log(data);
-        result = data;
+        //result = data;
     }).catch(function (error) {
         console.warn('Something went wrong.', error);
-    });
-    return result;
+    });*/
+ //return result;
 }
 
 function parse(sql){
