@@ -13,9 +13,9 @@ window.onload = () => {
 
         fragment.querySelector('textarea[name="txSql"]').value = `
       select * 
-        from innovator.Alias a 
-       inner join innovator.Identity b 
-          on a.related_Id = b.id`;
+        from innovator.ALIAS a 
+       inner join innovator.IDENTITY b 
+          on a.RELATED_ID = b.ID`;
           
         //template의 td
         template.parentNode.appendChild(fragment);
@@ -26,36 +26,58 @@ window.onload = () => {
         let sqls = getSqlStatements();
         //get table names
         //get cols relation
-        let tableNames = [];
+        let tablesFromQuery = [];
         let arrowsFromQuery = [];
         for(let sql of sqls){
+            if(!sql) continue;
             let tmpRes = parse(sql);
-            tableNames.push(...tmpRes.tables);
+            tablesFromQuery.push(...tmpRes.tables);
             arrowsFromQuery.push(...tmpRes.arrows);
         }
         
         let tables = [];
+        let tablesSet = new Set();
         let arrows = [];
+        let arrowsSet = new Set();
         //make table object
-        for(let tableName of tableNames){
+        for(let tableName of tablesFromQuery){
             let table = await tableInfo(tableName);
+            
+            if(tablesSet.has(table.name)) continue;
             tables.push(table);
+            tablesSet.add(table.name);
             addTableUI(table);
+            
 
-            let arrow = await tableWhereUsed(tableName);
-            arrows.push(...arrow);
+            let usedArrows = await tableWhereUsed(tableName);
+            for(let usedArrow of usedArrows){
+                let toTb = await tableInfo(usedArrow.ToTb);
+                if(tablesSet.has(toTb.name)) continue;
+                tables.push(toTb);
+                tablesSet.add(toTb.name);
+                addTableUI(toTb);
+            }
+
+            arrows.push(...usedArrows);
         }
         //make cols relation object
         //arrowsFromQuery 지지고 볶고
 
 
         //send to drawIo
-        erd.tables = tables;
-        erd.arrows = arrows;
+        erd.tables = [...tables];
+        erd.arrows = [...arrows];
         erd.draw();
        
 
     }, false);
+}
+
+function existPush(set, value, arr){
+    if(!set.has(value)){
+        set.add(value);
+
+    }
 }
 
 function addTableUI(table){
@@ -158,11 +180,11 @@ function parse(sql){
 //getStrFrom('select * from user where userId = 5 group by aa order by 3')
 //getStrFrom('select * from user a inner join team b on a.teamId = b.id left outer join common c on c.id = b.name')
 function getStrFrom(sql){
-    sql = sql.toLowerCase();
-    let idxFrom = sql.indexOf('from')+4
-    let idxWhere = sql.indexOf('where');
-    let idxGroupBy = sql.indexOf('group by');
-    let idxOrderBy = sql.indexOf('order by');
+    sql = sql.toUpperCase();
+    let idxFrom = sql.indexOf('FROM')+4
+    let idxWhere = sql.indexOf('WHERE');
+    let idxGroupBy = sql.indexOf('GROUP BY');
+    let idxOrderBy = sql.indexOf('ORDER BY');
     let strFrom = "";
     if (idxWhere >= 0)
         strFrom = sql.substring(idxFrom,idxWhere);
@@ -181,14 +203,14 @@ function getTableInfo(from){
         tables:[],
         arrows:[]
     };
-    let elem = ('join '+from).split(' ');
+    let elem = ('JOIN '+from).split(' ');
     let tbAlias = new Object();
     let cols = new Array();
     for(let i = 0; i<elem.length; i++){
-        if(elem[i] == 'join'){
+        if(elem[i] == 'JOIN'){
             tbAlias[elem[i+2]] = elem[i+1];
             result.tables.push(elem[i+1]);
-        }else if(elem[i] == 'on' || elem[i] == 'and'){
+        }else if(elem[i] == 'ON' || elem[i] == 'AND'){
             let arrow = new Object();
             let left = elem[i+1].split('.');
             let right = elem[i+3].split('.');

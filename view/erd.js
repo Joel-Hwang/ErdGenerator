@@ -23,11 +23,18 @@ let erd = {
   </root>
 </mxGraphModel>`;
         let y = 10;
+        let x = 0;
         let xml = '';
+        let count = 0;
         for(let table of erd.tables){
-            let xmlTable = getXmlFromTable(table,0,y);
+            let xmlTable = getXmlFromTable(table,x,y);
             xml += xmlTable;
-            y+=50;
+            x+=300;
+            
+            if((count++)%5==0) {
+              y+=500;
+              x = 0;
+            }
         }
         for(let arrow of erd.arrows){
             let xmlArrow = getXmlFromRel(arrow.FromTb,arrow.FromCol,
@@ -135,7 +142,7 @@ let erd = {
             arrow = 'endArrow=ERmandOne;startArrow=ERmandOne';
             break; 
      }
-    let xml = `<mxCell id="${fromTable+'.'+fromCol}-${toTable+'.'+toCol}" value="" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;${arrow};rounded=1;" edge="1" parent="1" source="${fromTable.name+'-'+fromCol}" target="${toTable.name+'-'+toCol}">
+    let xml = `<mxCell id="${fromTable+'.'+fromCol}-${toTable+'.'+toCol}" value="" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;${arrow};rounded=1;" edge="1" parent="1" source="${fromTable+'-'+fromCol}" target="${toTable+'-'+toCol}">
           <mxGeometry width="100" height="100" relative="1" as="geometry">
             <mxPoint x="530" y="470" as="sourcePoint" />
             <mxPoint x="630" y="370" as="targetPoint" />

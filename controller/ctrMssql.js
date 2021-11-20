@@ -64,7 +64,9 @@ router.get('/mssql/:table/cols', async (req,res) => {
       -- , IS_NULLABLE AS IsNull
       -- , Data_Type AS DataType
       -- , CHARACTER_MAXIMUM_LENGTH AS Len 
-      from information_schema.columns where table_name = '${req.params.table}'
+      from information_schema.columns 
+     where table_name = '${req.params.table}'
+       and Column_Name NOT IN('SORT_ORDER','PERMISSION_ID','OWNED_BY_ID','NOT_LOCKABLE','NEW_VERSION','MODIFIED_ON','MODIFIED_BY_ID','MINOR_REV','MANAGED_BY_ID','MAJOR_REV','LOCKED_BY_ID','LABEL','KEYED_NAME','IS_RELEASED','IS_CURRENT','GENERATION','CURRENT_STATE','CSS','CREATED_ON','CREATED_BY_ID','CONFIG_ID','CLASSIFICATION','BEHAVIOR')
     EXCEPT
     SELECT TABLE_NAME AS Tb
          , COLUMN_NAME AS Col
