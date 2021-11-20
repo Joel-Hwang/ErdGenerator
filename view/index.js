@@ -30,8 +30,27 @@ window.onload = () => {
         console.log(tbIdentity);
         let tbAlias = await tableInfo('Alias');
         console.log(tbAlias);
+        let userArrows = await tableWhereUsed('User');
+        console.log(userArrows);
     }, false);
 }
+async function tableWhereUsed(name){
+    let arrows = new Array();
+    const resArrows = await getRes(`/mssql/${name}/whereUsed`);
+    for(let row of resArrows){
+        let arrow = {};
+        arrow.FromTb = row.FromTb;
+        arrow.FromCol = row.FromCol;
+        arrow.ToTb = row.ToTb;
+        arrow.ToCol = row.ToCol;
+        arrow.type= 12;
+        arrows.push(arrow);
+    }
+
+    return arrows;
+
+}
+
 
 async function tableInfo(name){
     let table = {
@@ -41,7 +60,7 @@ async function tableInfo(name){
         col:[]
     };
 
-    const pkfk = await getRes(`/mssql/${name}/pkfk`)
+    const pkfk = await getRes(`/mssql/${name}/pkfk`);
     for(let row of pkfk){
         if(row.ColType === 'PK') table.pk.push(row.Col);
         else table.fk.push(row.Col);
