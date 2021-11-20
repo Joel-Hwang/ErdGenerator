@@ -68,11 +68,12 @@
     <div style="text-align: right; padding: 20px;margin-top: -80px;">
         <button id="btnAdd" type="button" class="btn btn-primary">Add</button>
     </div>
-
-    <div id="divSql"> 
+   
+    <div id="divSql">
+         
         <template id="tmpSql">
             <div class="form-floating" style="margin: 10px;">
-                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+                <textarea class="form-control" name = "txSql" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
                 <label for="floatingTextarea">SQL</label>
             </div>
         </template>
@@ -83,33 +84,31 @@
         <h5>Result</h5>
         <hr>
     </div>
-    <div style="display: flex;flex-wrap: wrap;">
-        <div class="card" style="margin: 5px;">
-            <div class="card-header">
-              User
-            </div>
-            <div class="card-body">
-                <p class="card-text">PK : ID</p>
-                <p class="card-text">FK : TeamID</p>
-                <p class="card-text">Name,Email.Phone</p>
-            </div>
-          </div>
-          <div class="card" style="margin: 5px;">
-            <div class="card-header">
-              Team
-            </div>
-            <div class="card-body">
-                <p class="card-text">PK : ID</p>
-                <p class="card-text">FK : Leader</p>
-                <p class="card-text">Name,Location,Parent</p>
-            </div>
-          </div>
-    </div>
-
-    <div style="text-align: center;">
+    <div style="text-align: right;padding:20px; margin-top:-80px;">
         <button id="btnGen" type="button" class="btn btn-success">Generate</button>
     </div>
 
+    <div style="display: flex;flex-wrap: wrap;">
+        <template id="tmpTb">
+            <div class="card" style="margin: 5px;">
+                <div class="card-header">
+                  <span id="tbName">User</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">PK : <span id="pk">ID</span></p>
+                    <p class="card-text">FK : <span id="fk">TeamID</span></p>
+                    <p class="card-text">Cols : <span id="col">Name,Email.Phone</span></p>
+                </div>
+              </div>
+        </template>
+         
+    </div>
+
+    
+
     <script src="index.js"></script>
+    <script src="diagram-editor.js"></script>
+    <script src="pako.min.js"></script>
+    <script src="erd.js"></script>
 </body>
 </html>

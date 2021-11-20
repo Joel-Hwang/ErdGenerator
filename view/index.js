@@ -10,31 +10,76 @@ window.onload = () => {
         const template = document.querySelector('#tmpSql');
         //template 복제
         const fragment = template.content.cloneNode(true);
+
+        fragment.querySelector('textarea[name="txSql"]').value = `
+      select * 
+        from innovator.Alias a 
+       inner join innovator.Identity b 
+          on a.related_Id = b.id`;
+          
         //template의 td
         template.parentNode.appendChild(fragment);
     },false);
-    
-    btnGen.addEventListener('click', async ()=>{
-        parse(`
-        select * 
-          from user a 
-         inner join team b 
-            on a.teamId = b.id 
-          left outer join common c 
-            on c.id = b.name
-        `);
 
-        let tbUser = await tableInfo('User');
-        console.log(tbUser);
-        let tbIdentity = await tableInfo('Identity');
-        console.log(tbIdentity);
-        let tbAlias = await tableInfo('Alias');
-        console.log(tbAlias);
-        let userArrows = await tableWhereUsed('User');
-        console.log(userArrows);
+    btnGen.addEventListener('click', async ()=>{
+        //get sql statements
+        let sqls = getSqlStatements();
+        //get table names
+        //get cols relation
+        let tableNames = [];
+        let arrowsFromQuery = [];
+        for(let sql of sqls){
+            let tmpRes = parse(sql);
+            tableNames.push(...tmpRes.tables);
+            arrowsFromQuery.push(...tmpRes.arrows);
+        }
+        
+        let tables = [];
+        let arrows = [];
+        //make table object
+        for(let tableName of tableNames){
+            let table = await tableInfo(tableName);
+            tables.push(table);
+            addTableUI(table);
+
+            let arrow = await tableWhereUsed(tableName);
+            arrows.push(...arrow);
+        }
+        //make cols relation object
+        //arrowsFromQuery 지지고 볶고
+
+
+        //send to drawIo
+        erd.tables = tables;
+        erd.arrows = arrows;
+        erd.draw();
+       
+
     }, false);
 }
-async function tableWhereUsed(name){
+
+function addTableUI(table){
+    const template = document.querySelector('#tmpTb');
+    //template 복제
+    const fragment = template.content.cloneNode(true);
+    fragment.querySelector('#tbName').textContent = table.name;
+    fragment.querySelector('#pk').textContent = table.pk;
+    fragment.querySelector('#fk').textContent = table.fk;
+    fragment.querySelector('#col').textContent = table.col;
+    //template의 td
+    template.parentNode.appendChild(fragment);
+}
+function getSqlStatements(){
+    let result = new Array();
+    let txSqls = document.querySelectorAll('textarea[name="txSql"]');
+    for(let txSql of txSqls){
+        result.push(txSql.value);
+    }
+    return result;
+}
+async function tableWhereUsed(fullTable){
+    let splitFullTable = fullTable.split('.');
+    let name = splitFullTable[splitFullTable.length-1];
     let arrows = new Array();
     const resArrows = await getRes(`/mssql/${name}/whereUsed`);
     for(let row of resArrows){
@@ -52,7 +97,9 @@ async function tableWhereUsed(name){
 }
 
 
-async function tableInfo(name){
+async function tableInfo(fullTable){
+    let splitFullTable = fullTable.split('.');
+    let name = splitFullTable[splitFullTable.length-1];
     let table = {
         name:name,
         pk:[],
@@ -104,6 +151,7 @@ async function connect(){
 function parse(sql){
     let from = getStrFrom(sql);
     let tableInfo = getTableInfo(from);
+    return tableInfo;
 }
 //table Name, related cols
 //getStrFrom('select * from user group by aa order by 3')
@@ -129,20 +177,29 @@ function getStrFrom(sql){
 }
 
 function getTableInfo(from){
+    let result = {
+        tables:[],
+        arrows:[]
+    };
     let elem = ('join '+from).split(' ');
-    let tables = new Object();
+    let tbAlias = new Object();
     let cols = new Array();
     for(let i = 0; i<elem.length; i++){
         if(elem[i] == 'join'){
-            tables[elem[i+2]] = elem[i+1];
+            tbAlias[elem[i+2]] = elem[i+1];
+            result.tables.push(elem[i+1]);
         }else if(elem[i] == 'on' || elem[i] == 'and'){
-            let col = new Object();
+            let arrow = new Object();
             let left = elem[i+1].split('.');
             let right = elem[i+3].split('.');
-            col.left = tables[left[0]]+'.'+left[1];
-            col.right = tables[right[0]]+'.'+right[1];
-            cols.push(col);
+            arrow.FromTb = tbAlias[left[0]];
+            arrow.FromCol = left[left.length-1];
+            arrow.ToTb = tbAlias[right[0]]
+            arrow.ToCol = right[right.length-1];
+            result.arrows.push(arrow);
         }
     }
-    return [tables,cols];
+    const tableSet = new Set(result.tables);
+    result.tables = [...tableSet];
+    return result;
 }
