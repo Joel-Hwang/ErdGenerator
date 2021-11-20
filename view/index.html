@@ -38,24 +38,22 @@
     <div>
         <div class="input-group mb-3" style="padding: 5px 20px;">
             <select id="dbms" class="form-select form-select-sm" style="padding: 5px 20px;">
-                <option selected>DBMS</option>
-                <option value="1">Oracle</option>
-                <option value="2">MSSQL</option>
-                <option value="3">MariaDB</option>
+                <option value="oracle">Oracle</option>
+                <option value="mssql" selected>MSSQL</option>
             </select>
         </div>
         
         <div class="input-group mb-3" style="padding: 5px 20px;">
             <span class="input-group-text" id="basic-addon1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IP</span>
-            <input id="server" type="text" class="form-control" placeholder="Database IP" aria-label="Database IP" aria-describedby="basic-addon1">
+            <input id="server" type="text" value="localhost" class="form-control" placeholder="Database IP" aria-label="Database IP" aria-describedby="basic-addon1">
         </div>
         <div class="input-group mb-3" style="padding: 5px 20px;">
             <span class="input-group-text" id="basic-addon1">Instance</span>
-            <input id="database" type="text" class="form-control" placeholder="Database Instance" aria-label="Database Instance" aria-describedby="basic-addon1">
+            <input id="database" type="text" value="innovatorSolutions" class="form-control" placeholder="Database Instance" aria-label="Database Instance" aria-describedby="basic-addon1">
           </div>
           <div class="input-group mb-3" style="padding: 5px 20px;">
             <span class="input-group-text" id="basic-addon1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID</span>
-            <input id= "user" type="text" class="form-control" placeholder="User ID" aria-label="User ID" aria-describedby="basic-addon1">
+            <input id= "user" type="text" value="sa" class="form-control" placeholder="User ID" aria-label="User ID" aria-describedby="basic-addon1">
           </div>
           <div class="input-group mb-3" style="padding: 5px 20px;">
             <span class="input-group-text" id="basic-addon1">Password</span>

@@ -14,13 +14,57 @@ window.onload = () => {
         template.parentNode.appendChild(fragment);
     },false);
     
-    btnGen.addEventListener('click', ()=>{
-        
+    btnGen.addEventListener('click', async ()=>{
+        parse(`
+        select * 
+          from user a 
+         inner join team b 
+            on a.teamId = b.id 
+          left outer join common c 
+            on c.id = b.name
+        `);
 
-        parse('select * from user a inner join team b on a.teamId = b.id left outer join common c on c.id = b.name');
+        let tbUser = await tableInfo('User');
+        console.log(tbUser);
+        let tbIdentity = await tableInfo('Identity');
+        console.log(tbIdentity);
+        let tbAlias = await tableInfo('Alias');
+        console.log(tbAlias);
     }, false);
 }
 
+async function tableInfo(name){
+    let table = {
+        name:name,
+        pk:[],
+        fk:[],
+        col:[]
+    };
+
+    const pkfk = await getRes(`/mssql/${name}/pkfk`)
+    for(let row of pkfk){
+        if(row.ColType === 'PK') table.pk.push(row.Col);
+        else table.fk.push(row.Col);
+    }
+
+    const cols = await getRes(`/mssql/${name}/cols`);
+    for(let row of cols){
+        table.col.push(row.Col);
+    }
+
+    return table;
+}
+
+async function getRes(url){
+    const res = await fetch(url, {
+        method:'GET',
+        headers:{
+            'Content-type':'application/json'
+        }
+    });
+    let resData = await res.json();
+    return resData;
+}
 async function connect(){
     let result = {};
     let server = document.querySelector('#server').value;
@@ -36,18 +80,6 @@ async function connect(){
     });
     let data = await response.json();
     return data;
-    /*.then(function (response) {
-        if (response.ok) {
-            return response.json();
-        }
-        return Promise.reject(response);
-    }).then(function (data) {
-        console.log(data);
-        //result = data;
-    }).catch(function (error) {
-        console.warn('Something went wrong.', error);
-    });*/
- //return result;
 }
 
 function parse(sql){
