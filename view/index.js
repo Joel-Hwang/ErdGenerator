@@ -78,6 +78,8 @@ window.onload = () => {
         //arrowsFromQuery 지지고 볶고
         for (let arrowFromQuery of arrowsFromQuery) {
             arrowFromQuery.type = await arrowType(arrowFromQuery);
+            arrowFromQuery.FromTb = pickTableName(arrowFromQuery.FromTb);
+            arrowFromQuery.ToTb = pickTableName(arrowFromQuery.ToTb);
             if(arrowsSet.has(arrowKey(arrowFromQuery))) continue;
             arrows.push(arrowFromQuery);
             arrowsSet.add(arrowKey(arrowFromQuery));
@@ -137,10 +139,14 @@ async function tableWhereUsed(fullTable){
 
 }
 
-
-async function tableInfo(fullTable){
+function pickTableName(fullTable){
     let splitFullTable = fullTable.split('.');
     let name = splitFullTable[splitFullTable.length-1];
+    return name;
+}
+
+async function tableInfo(fullTable){
+    let name = pickTableName(fullTable);
     let table = {
         name:name,
         pk:[],

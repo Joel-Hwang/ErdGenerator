@@ -28,8 +28,9 @@ let erd = {
         let colCnt = parseInt(Math.sqrt(erd.tables.length));
         let count = 1;
         let maxY = 0;
+        let collapse = true;
         for(let table of erd.tables){
-            let xmlTable = getXmlFromTable(table,x,y);
+            let xmlTable = getXmlFromTable(table,x,y,collapse);
             xml += xmlTable;
             x+=300;
             
@@ -38,7 +39,13 @@ let erd = {
               x = count*10;
               maxY = 0;
             }
-            maxY = Math.max(maxY,(table.pk.length+table.fk.length +table.col.length)*30 ) ;
+
+            if(collapse){
+              maxY = Math.max(maxY, 100 ) ;
+            }else{
+              maxY = Math.max(maxY,(table.pk.length+table.fk.length +table.col.length)*30 ) ;
+            }
+            
         }
         for(let arrow of erd.arrows){
             let xmlArrow = getXmlFromRel(arrow.FromTb,arrow.FromCol,
@@ -53,13 +60,23 @@ let erd = {
 
 };
 
-   function getXmlFromTable(table,posX,posY){
+   function getXmlFromTable(table,posX,posY, collapse){
        let idx = 1;
        let y = 0;
-       let header = `
-    <mxCell id="{0}" value="{1}" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;strokeColor=default;" vertex="1" parent="1">
-      <mxGeometry x="${posX}" y="${posY}" width="180" height="{2}" as="geometry" />
-    </mxCell>`;
+       let header = '';
+       if(collapse){
+        header = `
+        <mxCell id="{0}" value="{1}" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;strokeColor=default;" vertex="1" parent="1" collapsed="1">
+          <mxGeometry x="${posX}" y="${posY}" width="180" height="30" as="geometry">
+            <mxRectangle x="${posX}" y="${posY}" width="180" height="{2}" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>`;
+       }else{
+        header = `
+        <mxCell id="{0}" value="{1}" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;strokeColor=default;" vertex="1" parent="1">
+          <mxGeometry x="${posX}" y="${posY}" width="180" height="{2}" as="geometry" />
+        </mxCell>`;
+       }
         let pk = `
     <mxCell id="{1}" value="" style="shape=partialRectangle;collapsible=0;dropTarget=0;pointerEvents=0;fillColor=none;top=0;left=0;bottom=1;right=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="{0}">
       <mxGeometry y="{5}" width="180" height="30" as="geometry" />

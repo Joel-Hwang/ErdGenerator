@@ -40,10 +40,10 @@ router.post('/mssql/connect', async function (req, res) {
 router.get('/mssql/:table/whereUsed', async (req,res) => {
 
     let q = `
-select object_name(fc.referenced_object_id) FromTb
-	 , col_name(fc.referenced_object_id, fc.referenced_column_id) FromCol
-     , object_name(f.parent_object_id) ToTb
-	 , col_name(fc.parent_object_id, fc.parent_column_id) ToCol
+select UPPER(object_name(fc.referenced_object_id)) FromTb
+	 , UPPER(col_name(fc.referenced_object_id, fc.referenced_column_id)) FromCol
+     , UPPER(object_name(f.parent_object_id)) ToTb
+	 , UPPER(col_name(fc.parent_object_id, fc.parent_column_id)) ToCol
   from sys.foreign_keys as f
  inner join sys.foreign_key_columns as fc
     on f.object_id = fc.constraint_object_id
@@ -58,7 +58,7 @@ select object_name(fc.referenced_object_id) FromTb
 
 router.get('/mssql/:table/cols', async (req,res) => {
     let q = `
-    select Table_Name AS Tb
+    select UPPER(Table_Name) AS Tb
          , UPPER( Column_Name ) AS Col
       -- , 'Col' AS ColType
       -- , IS_NULLABLE AS IsNull
@@ -81,9 +81,9 @@ router.get('/mssql/:table/cols', async (req,res) => {
 router.get('/mssql/:table/pkfk', async (req,res) => {
 
     let q = `
-    SELECT TABLE_NAME AS Tb
+    SELECT UPPER(TABLE_NAME) AS Tb
          , UPPER( Column_Name ) AS Col
-         , LEFT(CONSTRAINT_NAME,2) AS ColType
+         , UPPER(LEFT(CONSTRAINT_NAME,2)) AS ColType
       FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
      WHERE TABLE_NAME = '${req.params.table}'
        AND LEFT(CONSTRAINT_NAME,2) IN ('PK','FK')
