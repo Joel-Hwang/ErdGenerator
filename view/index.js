@@ -61,15 +61,17 @@ window.onload = () => {
 
             let usedArrows = await tableWhereUsed(tableFromQuery);
             for(let usedArrow of usedArrows){
+                if(arrowsSet.has(arrowKey(usedArrow))) continue;
+                arrows.push(usedArrow);
+                arrowsSet.add(arrowKey(usedArrow));
+                
                 let toTb = await tableInfo(usedArrow.ToTb);
                 if(tablesSet.has(toTb.name)) continue;
                 tables.push(toTb);
                 tablesSet.add(toTb.name);
                 addTableUI(toTb);
 
-                if(arrowsSet.has(arrowKey(usedArrow))) continue;
-                arrows.push(usedArrow);
-                arrowsSet.add(arrowKey(usedArrow));
+                
             }
         }
         //make cols relation object
