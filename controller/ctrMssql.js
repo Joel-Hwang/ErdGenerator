@@ -59,7 +59,7 @@ select object_name(fc.referenced_object_id) FromTb
 router.get('/mssql/:table/cols', async (req,res) => {
     let q = `
     select Table_Name AS Tb
-         , Column_Name AS Col
+         , UPPER( Column_Name ) AS Col
       -- , 'Col' AS ColType
       -- , IS_NULLABLE AS IsNull
       -- , Data_Type AS DataType
@@ -82,7 +82,7 @@ router.get('/mssql/:table/pkfk', async (req,res) => {
 
     let q = `
     SELECT TABLE_NAME AS Tb
-         , COLUMN_NAME AS Col
+         , UPPER( Column_Name ) AS Col
          , LEFT(CONSTRAINT_NAME,2) AS ColType
       FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
      WHERE TABLE_NAME = '${req.params.table}'
@@ -90,6 +90,28 @@ router.get('/mssql/:table/pkfk', async (req,res) => {
     `;
     await postReq(res,q);
 });
+
+router.get('/mssql/:FromTb/:FromCol/:ToTb/:ToCol', async (req, res) => {
+    let q = `
+    SELECT DISTINCT TOP 1 (SELECT COUNT(*) 
+                             FROM ${req.params.ToTb} B 
+                            WHERE B.${req.params.ToCol} = A.${req.params.FromCol}) AS Cnt
+      FROM ${req.params.FromTb} A
+     ORDER BY CNT DESC
+    `;
+    /*let q = `
+    SELECT A.${req.params.ToCol} AS 'From' ,COUNT(*) AS 'To'
+      FROM ${req.params.FromTb} A
+     INNER JOIN ${req.params.ToTb} B
+        ON A.${req.params.FromCol} = B.${req.params.ToCol}
+     WHERE A.${req.params.FromCol} IN (SELECT TOP 100 C.${req.params.FromCol} 
+                                         FROM ${req.params.FromTb} C )
+     GROUP BY A.${req.params.ToCol}
+    HAVING COUNT(*)>1
+    `;*/
+    await postReq(res,q);
+});
+
 
 async function postReq(res, q){
     var sqlReq = new sql.Request();

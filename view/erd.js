@@ -25,16 +25,20 @@ let erd = {
         let y = 10;
         let x = 0;
         let xml = '';
-        let count = 0;
+        let colCnt = parseInt(Math.sqrt(erd.tables.length));
+        let count = 1;
+        let maxY = 0;
         for(let table of erd.tables){
             let xmlTable = getXmlFromTable(table,x,y);
             xml += xmlTable;
             x+=300;
             
-            if((count++)%5==0) {
-              y+=500;
-              x = 0;
+            if((count++)%colCnt==0) {
+              y += maxY + 100;
+              x = count*10;
+              maxY = 0;
             }
+            maxY = Math.max(maxY,(table.pk.length+table.fk.length +table.col.length)*30 ) ;
         }
         for(let arrow of erd.arrows){
             let xmlArrow = getXmlFromRel(arrow.FromTb,arrow.FromCol,

@@ -12,10 +12,20 @@ window.onload = () => {
         const fragment = template.content.cloneNode(true);
 
         fragment.querySelector('textarea[name="txSql"]').value = `
-      select * 
-        from innovator.ALIAS a 
-       inner join innovator.IDENTITY b 
-          on a.RELATED_ID = b.ID`;
+        select c.category 
+        , c.name as major
+        , a.name as className
+        , a.point as Point
+        , b.name as Professor
+        , e.name as Student
+        , e.grade as Grade
+        , e.birth as Age
+        , d.score as Score
+     from class a
+    inner join professor b on a.professor = b.id
+    inner join major c on a.major = c.id
+    inner join CLASS_STUDENT d on a.id = d.class_id 
+    inner join STUDENT e on d.student_id = e.id`;
           
         //template의 td
         template.parentNode.appendChild(fragment);
@@ -40,8 +50,8 @@ window.onload = () => {
         let arrows = [];
         let arrowsSet = new Set();
         //make table object
-        for(let tableName of tablesFromQuery){
-            let table = await tableInfo(tableName);
+        for(let tableFromQuery of tablesFromQuery){
+            let table = await tableInfo(tableFromQuery);
             
             if(tablesSet.has(table.name)) continue;
             tables.push(table);
@@ -49,21 +59,28 @@ window.onload = () => {
             addTableUI(table);
             
 
-            let usedArrows = await tableWhereUsed(tableName);
+            let usedArrows = await tableWhereUsed(tableFromQuery);
             for(let usedArrow of usedArrows){
                 let toTb = await tableInfo(usedArrow.ToTb);
                 if(tablesSet.has(toTb.name)) continue;
                 tables.push(toTb);
                 tablesSet.add(toTb.name);
                 addTableUI(toTb);
-            }
 
-            arrows.push(...usedArrows);
+                if(arrowsSet.has(arrowKey(usedArrow))) continue;
+                arrows.push(usedArrow);
+                arrowsSet.add(arrowKey(usedArrow));
+            }
         }
         //make cols relation object
         //arrowsFromQuery 지지고 볶고
-
-
+        for (let arrowFromQuery of arrowsFromQuery) {
+            arrowFromQuery.type = await arrowType(arrowFromQuery);
+            if(arrowsSet.has(arrowKey(arrowFromQuery))) continue;
+            arrows.push(arrowFromQuery);
+            arrowsSet.add(arrowKey(arrowFromQuery));
+        }
+        
         //send to drawIo
         erd.tables = [...tables];
         erd.arrows = [...arrows];
@@ -143,6 +160,20 @@ async function tableInfo(fullTable){
     return table;
 }
 
+async function arrowType(arrow){
+    const fromTo = await getRes(`/mssql/${arrow.FromTb}/${arrow.FromCol}/${arrow.ToTb}/${arrow.ToCol}`);
+    const toFrom = await getRes(`/mssql/${arrow.ToTb}/${arrow.ToCol}/${arrow.FromTb}/${arrow.FromCol}`);
+    
+    if(fromTo.length == 0 && toFrom.length == 0) return 11;
+    if(fromTo.length>0 && fromTo[0].Cnt > 1) return 12;
+    if(toFrom.length>0 && toFrom[0].Cnt > 1) return 21;
+    return 11;
+}
+
+function arrowKey(arrow){
+    return arrow.FromTb+arrow.FromCol+'-'+arrow.ToTb+arrow.ToCol;
+}
+
 async function getRes(url){
     const res = await fetch(url, {
         method:'GET',
@@ -172,7 +203,7 @@ async function connect(){
 
 function parse(sql){
     let from = getStrFrom(sql);
-    let tableInfo = getTableInfo(from);
+    let tableInfo = getTableArrow(from);
     return tableInfo;
 }
 //table Name, related cols
@@ -181,6 +212,7 @@ function parse(sql){
 //getStrFrom('select * from user a inner join team b on a.teamId = b.id left outer join common c on c.id = b.name')
 function getStrFrom(sql){
     sql = sql.toUpperCase();
+    sql = sql.replace(/\n/gi,' ');
     let idxFrom = sql.indexOf('FROM')+4
     let idxWhere = sql.indexOf('WHERE');
     let idxGroupBy = sql.indexOf('GROUP BY');
@@ -198,7 +230,7 @@ function getStrFrom(sql){
     return strFrom.trim();
 }
 
-function getTableInfo(from){
+function getTableArrow(from){
     let result = {
         tables:[],
         arrows:[]
@@ -225,3 +257,4 @@ function getTableInfo(from){
     result.tables = [...tableSet];
     return result;
 }
+
